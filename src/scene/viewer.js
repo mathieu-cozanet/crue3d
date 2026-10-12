@@ -3,8 +3,12 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { DEPTH_CLASSES } from "../config.js";
 import { polygonsOf, linesOf } from "../geo.js";
+import { rasterizeMask } from "../raster.js";
+import { waterSurface, facadeWaterTop } from "../water.js";
+import { createWaterMaterial, addFacadeWaterLine } from "./waterMaterial.js";
 
-const DEPTH_MID = [0.25, 0.75, 1.25, 1.75, 2.3];
+const RISE_MS = 1100;   // duration of the water rising / receding between two maps
+const easeInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2);
 const ROOF = new THREE.Color("#b8674c"), WALL = new THREE.Color("#ece5d8"), SELECTED = new THREE.Color("#ffc94d");
 const CLASS_COLORS = DEPTH_CLASSES.map(c => new THREE.Color(c.color));
 
@@ -42,6 +46,9 @@ export class FloodViewer {
     sun.shadow.bias = -0.0005;
     sun.shadow.normalBias = 0.5;
     this.scene.add(sun, sun.target);
+    // uniforms shared by the water surface and the facade water line, so both move together
+    this.shared = { uMix: { value: 1 }, uTime: { value: 0 }, uSunDir: { value: sun.position.clone().normalize() } };
+    this.animated = [];
 
     this.ray = new THREE.Raycaster();
     this.group = new THREE.Group();
@@ -67,6 +74,15 @@ export class FloodViewer {
 
   frame(t) {
     if (this.pin) this.pin.position.y = this.pinY + Math.sin(t / 350) * 1.2;
+    this.shared.uTime.value = t / 1000;
+    if (this.anim) {
+      const k = Math.min(1, (performance.now() - this.anim.start) / RISE_MS);
+      this.shared.uMix.value = easeInOut(k);
+      if (k === 1) {
+        this.anim = null;
+        if (this.water && !this.flood) this.water.visible = false;   // fully receded: skip drawing it
+      }
+    }
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
@@ -80,6 +96,7 @@ export class FloodViewer {
     this.buildTerrain();
     this.paintBase();
     this.buildBuildings();
+    this.buildWater();
     this.buildPin();
     const sc = this.sun.shadow.camera, half = Math.max(bbox.w, bbox.h) * 0.75;
     Object.assign(sc, { left: -half, right: half, top: half, bottom: -half, near: 10, far: 4000 });
@@ -95,6 +112,10 @@ export class FloodViewer {
     }
     this.pin = null;
     this.treesGroup = null;
+    this.water = null;
+    this.animated = [];
+    this.anim = null;
+    this.shared.uMix.value = 1;
   }
 
   /** Bilinear terrain height (absolute altitude) at a Lambert-93 point. */
@@ -193,11 +214,12 @@ export class FloodViewer {
     g.clearRect(0, 0, this.tex.w, this.tex.h);
     g.drawImage(this.baseCanvas, 0, 0);
     if (this.flood) {
-      const { data, cols, rows } = this.flood, img = new ImageData(cols, rows);
+      // with the 3D water on, the ground only looks soaked; otherwise it carries the legend colours
+      const { data, cols, rows } = this.flood, img = new ImageData(cols, rows), soaked = this.layers.water3d;
       for (let i = 0; i < data.length; i++) {
         if (!data[i]) continue;
         const c = CLASS_COLORS[data[i] - 1];
-        img.data.set([c.r * 255, c.g * 255, c.b * 255, 205], i * 4);
+        img.data.set(soaked ? [52, 66, 58, 80] : [c.r * 255, c.g * 255, c.b * 255, 205], i * 4);
       }
       const tmp = document.createElement("canvas"); tmp.width = cols; tmp.height = rows;
       tmp.getContext("2d").putImageData(img, 0, 0);
@@ -240,7 +262,7 @@ export class FloodViewer {
         geo.translate(0, base - this.z0, 0);
         geo.deleteAttribute("uv");
         const n = geo.attributes.position.count;
-        this.buildingRanges.push({ bi, start: vertexCount, count: n });
+        this.buildingRanges.push({ bi, start: vertexCount, count: n, base: base + 0.4 - this.z0 });
         for (let t = 0; t < n / 3; t++) owner.push(bi);
         vertexCount += n;
         geos.push(geo);
@@ -250,28 +272,108 @@ export class FloodViewer {
     const geo = mergeGeometries(geos, false);
     geos.forEach(g => g.dispose());
     geo.setAttribute("color", new THREE.BufferAttribute(new Float32Array(vertexCount * 3), 3));
+    const dry = new Float32Array(vertexCount);
+    for (const r of this.buildingRanges) dry.fill(facadeWaterTop(0, r.base), r.start, r.start + r.count);
+    geo.setAttribute("aWaterA", new THREE.BufferAttribute(dry, 1));
+    geo.setAttribute("aWaterB", new THREE.BufferAttribute(dry.slice(), 1));
+    geo.setAttribute("aStain", new THREE.BufferAttribute(new Float32Array(vertexCount * 3), 3));
+    this.animated.push([geo, "aWaterA", "aWaterB"]);
     this.faceOwner = Uint32Array.from(owner);
-    this.buildingsMesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, flatShading: true }));
+    const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, flatShading: true });
+    addFacadeWaterLine(material, this.shared);
+    this.buildingsMesh = new THREE.Mesh(geo, material);
     this.buildingsMesh.castShadow = this.buildingsMesh.receiveShadow = true;
     this.buildingsMesh.visible = this.layers.buildings;
     this.group.add(this.buildingsMesh);
   }
 
-  /** depths: Uint8Array per building (0 dry, k+1 class) — walls are tinted with the depth colour. */
-  colorBuildings(depths, selected = this.selected) {
+  /** depths: Uint8Array per building (0 dry, k+1 class): the facades get an animated water line at that depth. */
+  colorBuildings(depths) {
+    this.depths = depths;
+    if (!this.buildingsMesh) return;
+    this.bake();
+    const geo = this.buildingsMesh.geometry, top = geo.attributes.aWaterB, stain = geo.attributes.aStain;
+    for (const { bi, start, count, base } of this.buildingRanges) {
+      const d = depths?.[bi] || 0, c = d ? CLASS_COLORS[d - 1] : WALL;
+      top.array.fill(facadeWaterTop(d, base), start, start + count);
+      for (let v = start; v < start + count; v++) stain.setXYZ(v, c.r, c.g, c.b);
+    }
+    top.needsUpdate = stain.needsUpdate = true;
+    this.paintBuildings();
+  }
+
+  paintBuildings() {
     if (!this.buildingsMesh) return;
     const col = this.buildingsMesh.geometry.attributes.color, nrm = this.buildingsMesh.geometry.attributes.normal;
     for (const { bi, start, count } of this.buildingRanges) {
-      const d = depths?.[bi] || 0;
-      const wall = bi === selected ? SELECTED : d ? CLASS_COLORS[d - 1] : WALL;
-      const roof = bi === selected ? SELECTED : ROOF;
+      const sel = bi === this.selected;
       for (let v = start; v < start + count; v++) {
-        const c = nrm.getY(v) > 0.5 ? roof : wall;
+        const c = sel ? SELECTED : nrm.getY(v) > 0.5 ? ROOF : WALL;
         col.setXYZ(v, c.r, c.g, c.b);
       }
     }
     col.needsUpdate = true;
-    this.depths = depths;
+  }
+
+  /**
+   * Freeze what is on screen as the start of a new transition (A <- current blend of A and B), then restart.
+   * Called before each new target, so water and facades always move from where they visibly are.
+   */
+  bake() {
+    const m = this.shared.uMix.value;
+    for (const [geo, a, b] of this.animated) {
+      const A = geo.attributes[a].array, B = geo.attributes[b].array;
+      if (m !== 0) for (let i = 0; i < A.length; i++) A[i] += (B[i] - A[i]) * m;
+      geo.attributes[a].needsUpdate = true;
+    }
+    this.shared.uMix.value = 0;
+    this.anim = { start: performance.now() };
+  }
+
+  /** Full-grid water mesh; each vertex carries its ground height and two water levels to blend between. */
+  buildWater() {
+    const n = this.dem.cols * this.dem.rows, ground = new Float32Array(n);
+    for (let i = 0; i < n; i++) ground[i] = this.terrainPos[i * 3 + 1];
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(this.terrainPos.slice(), 3));
+    geo.setAttribute("uv", this.terrain.geometry.attributes.uv);
+    geo.setIndex(this.terrainIndex);
+    geo.setAttribute("ground", new THREE.BufferAttribute(ground, 1));
+    const dry = waterSurface(null, this.dem).map(v => v - this.z0);
+    geo.setAttribute("wseA", new THREE.BufferAttribute(dry, 1));
+    geo.setAttribute("wseB", new THREE.BufferAttribute(dry.slice(), 1));
+    geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), Math.hypot(this.bbox.w, this.bbox.h));
+    this.animated.push([geo, "wseA", "wseB"]);
+    this.water = new THREE.Mesh(geo, createWaterMaterial(this.shared, this.buildingProximity()));
+    this.water.renderOrder = 2;
+    this.water.visible = false;
+    this.group.add(this.water);
+  }
+
+  /** Blurred building footprints (0..1) on the terrain grid: drives the foam rings around flooded buildings. */
+  buildingProximity() {
+    const { cols, rows } = this.dem;
+    let a = Float32Array.from(rasterizeMask(this.buildingsData, this.bbox, this.dem, 0));
+    const blur = (src, dx, dy, R = 2) => {
+      const out = new Float32Array(src.length);
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        let sum = 0, k = 0;
+        for (let t = -R; t <= R; t++) {
+          const rr = r + t * dy, cc = c + t * dx;
+          if (rr >= 0 && cc >= 0 && rr < rows && cc < cols) { sum += src[rr * cols + cc]; k++; }
+        }
+        out[r * cols + c] = sum / k;
+      }
+      return out;
+    };
+    for (let pass = 0; pass < 2; pass++) a = blur(blur(a, 1, 0), 0, 1);
+    const data = new Uint8Array(cols * rows);
+    // texture rows run south to north, the grid north to south
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) data[(rows - 1 - r) * cols + c] = Math.round(a[r * cols + c] * 255);
+    const tex = new THREE.DataTexture(data, cols, rows, THREE.RedFormat, THREE.UnsignedByteType);
+    tex.magFilter = tex.minFilter = THREE.LinearFilter;
+    tex.needsUpdate = true;
+    return tex;
   }
 
   buildPin() {
@@ -298,38 +400,25 @@ export class FloodViewer {
     this.group.add(pin);
   }
 
-  /** Flood raster (or null). Paints depth colours and builds a translucent water surface. */
+  /** Flood raster (or null): the water rises or recedes to the new map instead of jumping. */
   setFlood(raster) {
+    const wasWet = !!this.flood;
     this.flood = raster;
     this.paintComposite();
     this.updateTreeLook();
-    if (this.water) { this.group.remove(this.water); this.water.geometry.dispose(); this.water = null; }
-    if (!raster || !this.layers.water3d) return;
-    const pos = this.terrainPos.slice(), wet = raster.data, { grid } = this.dem;
-    for (let i = 0; i < wet.length; i++) {
-      if (!wet[i]) continue;
-      pos[i * 3 + 1] = raster.bathtub ? raster.altitude - this.z0 : grid[i] - this.z0 + DEPTH_MID[wet[i] - 1];
-    }
-    const idx = [];
-    const I = this.terrainIndex;
-    for (let t = 0; t < I.length; t += 3) if (wet[I[t]] && wet[I[t + 1]] && wet[I[t + 2]]) idx.push(I[t], I[t + 1], I[t + 2]);
-    if (!idx.length) return;
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    geo.setIndex(idx);
-    geo.computeVertexNormals();
-    this.water = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
-      color: "#2f6fb0", transparent: true, opacity: 0.38, roughness: 0.15, metalness: 0.05, depthWrite: false,
-    }));
-    this.water.renderOrder = 2;
-    this.group.add(this.water);
+    if (!this.water) return;
+    this.bake();
+    const target = this.water.geometry.attributes.wseB;
+    target.array.set(waterSurface(raster, this.dem).map(v => v - this.z0));
+    target.needsUpdate = true;
+    this.water.visible = this.layers.water3d && (!!raster || wasWet);
   }
 
   setLayer(name, on) {
     this.layers[name] = on;
     if (name === "buildings" && this.buildingsMesh) this.buildingsMesh.visible = on;
     if (name === "ppri") this.paintComposite();
-    if (name === "water3d") this.setFlood(this.flood);
+    if (name === "water3d") { this.paintComposite(); if (this.water) this.water.visible = on && !!this.flood; }
     if (name === "trees") this.updateTreeLook();
   }
 
@@ -381,8 +470,9 @@ export class FloodViewer {
 
   select(bi) {
     this.selected = bi;
-    this.colorBuildings(this.depths, bi);
+    this.paintBuildings();
   }
+
 
   pick(e) {
     if (!this.buildingsMesh?.visible) return;

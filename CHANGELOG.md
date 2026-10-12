@@ -1,5 +1,15 @@
 # Journal des versions
 
+## 0.3.0 — 12 octobre 2026
+
+- Nouveau rendu de l'eau : surface animée (vagues, reflets du soleil et du ciel), couleur continue selon la
+  hauteur d'eau (même gamme que la légende), transparence sur les faibles hauteurs, écume sur les berges et
+  autour des bâtiments dans l'eau.
+- Berges naturelles : la surface est lissée et le rivage suit la rencontre de l'eau et du relief.
+- L'eau monte et descend en douceur quand on change de scénario.
+- Ligne d'eau sur les façades à la hauteur atteinte, au lieu de murs entièrement colorés.
+- Les calculs (bilan, hauteur au pied des bâtiments) sont inchangés.
+
 ## 0.2.0 — 12 octobre 2026
 
 - Calque **Arbres** (désactivé par défaut) : chaque arbre est détecté dans le relevé laser LiDAR HD de l'IGN,
