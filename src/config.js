@@ -10,6 +10,7 @@ export const API = {
 
 export const LAYERS = {
   dem: "ELEVATION.ELEVATIONGRIDCOVERAGE.HIGHRES",
+  surface: "ELEVATION.ELEVATIONGRIDCOVERAGE.HIGHRES.MNS",   // LiDAR HD: ground + vegetation + buildings
   buildings: "BDTOPO_V3:batiment",
   roads: "BDTOPO_V3:troncon_de_route",
   waterSurfaces: "BDTOPO_V3:surface_hydrographique",

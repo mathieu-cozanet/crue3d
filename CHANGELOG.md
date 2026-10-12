@@ -1,5 +1,11 @@
 # Journal des versions
 
+## 0.2.0 — 12 octobre 2026
+
+- Calque **Arbres** (désactivé par défaut) : chaque arbre est détecté dans le relevé laser LiDAR HD de l'IGN,
+  avec sa position, sa hauteur et la largeur de sa couronne mesurées. Téléchargement à la demande seulement ;
+  arbres transparents quand une crue est affichée ; repli explicite là où le relevé n'existe pas encore.
+
 ## 0.1.0 — 12 octobre 2026
 
 Première version.

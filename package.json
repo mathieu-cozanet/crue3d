@@ -1,6 +1,6 @@
 {
   "name": "crue3d",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Visualisation 3D open source de l'état des terrains en cas d'inondation, à partir des données publiques françaises (Vigicrues, IGN, Géorisques).",
   "license": "AGPL-3.0-or-later",
   "type": "module",

@@ -25,6 +25,11 @@ scénarios officiels**. Il s'adresse :
 5. La hauteur d'eau au pied de chaque bâtiment est la classe la plus profonde rencontrée sur son emprise
    (grille d'analyse de 1 m). Les ponts et tunnels sont exclus du décompte des voies coupées.
 
+Le calque **Arbres**, désactivé par défaut, détecte chaque arbre dans le relevé laser LiDAR HD de l'IGN (hauteur de
+la surface moins celle du sol, toits exclus) : position, hauteur et largeur de couronne réelles. Il n'est téléchargé
+que si on l'active (environ 3 Mo par km²), et les arbres deviennent transparents dès qu'une crue est affichée pour ne
+pas masquer les hauteurs d'eau. Ils servent à se repérer ; ils ne modifient pas les cartes de crue.
+
 Hors des tronçons cartographiés par Vigicrues, Crue 3D propose une simulation « baignoire » (plan d'eau horizontal),
 clairement signalée comme indicative, et affiche l'enveloppe du PPRI quand elle est publiée.
 
@@ -38,6 +43,7 @@ interrogés acceptent les appels directs (CORS).
 | Zones inondées et hauteurs d'eau (ZIP / ZICH) | Vigicrues, via la Géoplateforme IGN (`VIGINOND-DIFFUSION`) | Etalab 2.0 |
 | Niveau des rivières en temps réel | Hub'Eau – hydrométrie | Etalab 2.0 |
 | Relief | IGN RGE ALTI® (`ELEVATION.ELEVATIONGRIDCOVERAGE.HIGHRES`) | Etalab 2.0 |
+| Arbres (calque optionnel) | IGN LiDAR HD, modèle numérique de surface (`…HIGHRES.MNS`) | Etalab 2.0 |
 | Bâtiments, routes, hydrographie | IGN BD TOPO® | Etalab 2.0 |
 | Enveloppe des PPRI | Géoportail de l'Urbanisme (servitudes PM1, aléa inondation) | Etalab 2.0 |
 | Adresses | Base Adresse Nationale | Etalab 2.0 |
@@ -77,6 +83,7 @@ src/
   api/                   IGN (relief, BD TOPO), Vigicrues + Hub'Eau, BAN, GPU
   analysis.js            choix du scénario, exposition des bâtiments et des routes (fonctions pures, testées)
   raster.js              conversion des cartes de crue en grilles
+  trees.js               détection des arbres dans le relevé LiDAR (fonctions pures, testées)
   scene/viewer.js        scène 3D (Three.js)
   main.js                interface de l'application
 ```

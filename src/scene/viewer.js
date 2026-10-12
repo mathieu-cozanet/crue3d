@@ -16,7 +16,7 @@ export class FloodViewer {
   constructor(container, { onPick } = {}) {
     this.container = container;
     this.onPick = onPick;
-    this.layers = { buildings: true, roads: true, ppri: true, water3d: true };
+    this.layers = { buildings: true, roads: true, ppri: true, water3d: true, trees: false };
     const r = this.renderer = new THREE.WebGLRenderer({ antialias: true });
     r.setPixelRatio(Math.min(devicePixelRatio, 1.5));
     r.shadowMap.enabled = true;
@@ -94,6 +94,7 @@ export class FloodViewer {
       o.traverse?.(c => { c.geometry?.dispose(); if (c.material?.map) c.material.map.dispose(); c.material?.dispose?.(); });
     }
     this.pin = null;
+    this.treesGroup = null;
   }
 
   /** Bilinear terrain height (absolute altitude) at a Lambert-93 point. */
@@ -301,6 +302,7 @@ export class FloodViewer {
   setFlood(raster) {
     this.flood = raster;
     this.paintComposite();
+    this.updateTreeLook();
     if (this.water) { this.group.remove(this.water); this.water.geometry.dispose(); this.water = null; }
     if (!raster || !this.layers.water3d) return;
     const pos = this.terrainPos.slice(), wet = raster.data, { grid } = this.dem;
@@ -328,6 +330,53 @@ export class FloodViewer {
     if (name === "buildings" && this.buildingsMesh) this.buildingsMesh.visible = on;
     if (name === "ppri") this.paintComposite();
     if (name === "water3d") this.setFlood(this.flood);
+    if (name === "trees") this.updateTreeLook();
+  }
+
+  /** Trees from the LiDAR canopy: [{ x, y, h, r }] in Lambert-93, h = height above ground. */
+  setTrees(trees) {
+    if (this.treesGroup) {
+      this.group.remove(this.treesGroup);
+      this.treesGroup.traverse(o => { o.geometry?.dispose(); o.material?.dispose?.(); });
+      this.treesGroup = null;
+    }
+    if (!trees?.length) return;
+    const n = trees.length;
+    const trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.6, 1, 1, 6).translate(0, 0.5, 0),
+      new THREE.MeshLambertMaterial({ color: "#6b5139" }), n);
+    const crowns = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1),
+      new THREE.MeshLambertMaterial({ flatShading: true }), n);
+    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), sc = new THREE.Vector3(), col = new THREE.Color();
+    const up = new THREE.Vector3(0, 1, 0);
+    trees.forEach((t, k) => {
+      const [lx, ly] = this.local([t.x, t.y]);
+      const base = this.heightAt(t.x, t.y) - this.z0;
+      const depth = THREE.MathUtils.clamp(0.62 * t.h, 2, 18), trunkH = Math.max(0.8, t.h - depth + 0.6);
+      const tr = 0.12 + 0.015 * t.h;
+      m.compose(p.set(lx, base - 0.3, -ly), q.identity(), sc.set(tr, trunkH + 0.3, tr));
+      trunks.setMatrixAt(k, m);
+      m.compose(p.set(lx, base + t.h - depth / 2, -ly), q.setFromAxisAngle(up, k * 2.399), sc.set(t.r, depth / 2, t.r));
+      crowns.setMatrixAt(k, m);
+      const j = ((k * 104729) % 100) / 100;
+      crowns.setColorAt(k, col.setHSL(0.26 + j * 0.07, 0.36, 0.25 + j * 0.1));
+    });
+    crowns.receiveShadow = true;
+    this.treesGroup = new THREE.Group();
+    this.treesGroup.add(trunks, crowns);
+    this.group.add(this.treesGroup);
+    this.updateTreeLook();
+  }
+
+  /** Trees turn see-through while a flood is displayed, so they never hide the water depths below. */
+  updateTreeLook() {
+    if (!this.treesGroup) return;
+    this.treesGroup.visible = this.layers.trees;
+    const see = !!this.flood;
+    for (const mesh of this.treesGroup.children) {
+      Object.assign(mesh.material, { transparent: see, opacity: see ? 0.28 : 1, depthWrite: !see });
+      mesh.material.needsUpdate = true;
+      mesh.castShadow = !see;
+    }
   }
 
   select(bi) {

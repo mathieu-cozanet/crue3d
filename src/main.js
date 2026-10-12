@@ -1,12 +1,13 @@
 import { AREA_SIZES, DEFAULT_AREA, DEPTH_CLASSES, API } from "./config.js";
 import { makeBBox, toL93, toWGS, polygonsOf, pointInRings, haversineKm } from "./geo.js";
-import { fetchDEM, fetchBuildings, fetchRoads, fetchWaterSurfaces, fetchStreams } from "./api/ign.js";
+import { fetchDEM, fetchSurfaceModel, fetchBuildings, fetchRoads, fetchWaterSurfaces, fetchStreams } from "./api/ign.js";
 import { fetchFloodMaps, fetchStation, fetchWaterLevels } from "./api/vigicrues.js";
 import { fetchPPRI } from "./api/others.js";
 import { searchAddress } from "./api/ban.js";
 import { attachAddressAutocomplete } from "./ui/autocomplete.js";
 import { groupScenarios, selectScenario, footprintDepth, summarize, fmtLevel, depthLabel } from "./analysis.js";
-import { rasterizeScenario, rasterizeLevel, analysisGrid } from "./raster.js";
+import { rasterizeScenario, rasterizeLevel, analysisGrid, rasterizeMask } from "./raster.js";
+import { canopyHeight, detectTrees } from "./trees.js";
 import { FloodViewer } from "./scene/viewer.js";
 
 const $ = id => document.getElementById(id);
@@ -97,7 +98,9 @@ async function load(addr) {
   viewer.load({ bbox, dem: state.dem, buildings: state.buildings, roads: state.roads, waterSurfaces: state.water,
     streams: state.streams, ppri: state.ppri, homeIndex: state.homeIndex });
   $("loading").hidden = true;
+  state.trees = { status: "idle" };
   renderLegend(); renderLayers(); apply();
+  if (viewer.layers.trees) loadTrees();
 }
 
 function fail(msg) {
@@ -322,9 +325,43 @@ function exportGeoJSON() {
 // ---------- tab: layers ----------
 function renderLayers() {
   const items = [["buildings", "Bâtiments"], ["water3d", "Surface de l'eau en 3D"], ["ppri", `Contour du PPRI${state.ppri.length ? "" : " (aucun ici)"}`]];
+  const t = state.trees || { status: "idle" };
+  const treeNote = {
+    idle: "Relevé laser LiDAR HD de l'IGN, environ 3 Mo à télécharger.",
+    loading: "Chargement du relevé LiDAR…",
+    ready: `${t.count} arbre${t.count > 1 ? "s" : ""} détecté${t.count > 1 ? "s" : ""}, à leur hauteur réelle. Ils deviennent transparents quand une crue est affichée.`,
+    none: "Pas de relevé LiDAR HD sur cette zone pour le moment.",
+    error: "Relevé LiDAR indisponible pour le moment. Décochez puis recochez pour réessayer.",
+  }[t.status];
   $("tab-layers").innerHTML = items.map(([id, label]) => `<label class="toggle"><input type="checkbox" data-l="${id}" ${viewer.layers[id] ? "checked" : ""}> ${label}</label>`).join("")
+    + `<label class="toggle"><input type="checkbox" data-l="trees" ${viewer.layers.trees ? "checked" : ""}> Arbres</label>
+       <p class="note" style="margin:0 0 6px 26px">${treeNote}</p>`
     + `<p class="note">Couleurs au sol et sur les façades : hauteur d'eau (classes Vigicrues). Trait rouge pointillé : enveloppe des zones réglementées du PPRI.</p>`;
-  $("tab-layers").querySelectorAll("[data-l]").forEach(i => (i.onchange = () => viewer.setLayer(i.dataset.l, i.checked)));
+  $("tab-layers").querySelectorAll("[data-l]").forEach(i => (i.onchange = () => {
+    viewer.setLayer(i.dataset.l, i.checked);
+    if (i.dataset.l === "trees" && i.checked && ["idle", "error"].includes(state.trees?.status)) loadTrees();
+  }));
+}
+
+/** Trees are loaded on demand: the LiDAR surface model is the heaviest download of the app. */
+async function loadTrees() {
+  const bbox = state.bbox;
+  state.trees = { status: "loading" };
+  renderLayers();
+  try {
+    const surface = await fetchSurfaceModel(bbox);
+    if (bbox !== state.bbox) return;                    // the user moved to another address meanwhile
+    if (surface.coverage < 0.05) { state.trees = { status: "none" }; return; }
+    const mask = rasterizeMask(state.buildings, bbox, surface, 1.5);
+    const chm = canopyHeight(surface, bbox, (x, y) => viewer.heightAt(x, y), mask);
+    const trees = detectTrees(chm, surface.cols, surface.rows, surface.res, bbox);
+    viewer.setTrees(trees);
+    state.trees = { status: trees.length ? "ready" : "none", count: trees.length };
+  } catch {
+    if (bbox === state.bbox) state.trees = { status: "error" };
+  } finally {
+    if (bbox === state.bbox) renderLayers();
+  }
 }
 
 function renderLegend() {
