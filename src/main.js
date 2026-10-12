@@ -400,6 +400,19 @@ setInterval(async () => {
   } catch { /* keep the last known level; the panel shows its timestamp */ }
 }, 5 * 60e3);
 
+// Dev only: /app/?loader shows the loading screen in a loop (not in production builds).
+if (import.meta.env.DEV && new URL(location.href).searchParams.has("loader")) {
+  $("empty").hidden = true;
+  $("loading").hidden = false;
+  const mark = steps([["dem", "Relief (IGN)"], ["bati", "Bâtiments et routes (IGN BD TOPO)"], ["vigi", "Cartes de crue Vigicrues"], ["ppri", "PPRI (Géoportail de l'Urbanisme)"], ["level", "Niveau de la rivière en direct"]]);
+  let k = 0;
+  setInterval(() => {
+    const ids = ["dem", "bati", "vigi", "ppri", "level"];
+    if (k === ids.length) { document.querySelectorAll("#steps li").forEach(li => (li.className = "")); k = 0; return; }
+    mark(ids[k++]);
+  }, 900);
+}
+
 if (import.meta.env.DEV) window.__crue = { state, depthsFor: i => depthsFor(i), showBuilding, get viewer() { return viewer; } };
 
 // ---------- boot ----------
