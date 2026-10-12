@@ -1,0 +1,19 @@
+{
+  "name": "Crue 3D — zones inondées en 3D",
+  "short_name": "Crue 3D",
+  "description": "Voir en 3D ce que l'eau recouvre, adresse par adresse, d'après les cartes Vigicrues et le niveau des rivières en temps réel.",
+  "lang": "fr",
+  "start_url": "./app/",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#eef2f5",
+  "theme_color": "#1f6fb5",
+  "categories": ["utilities", "weather", "navigation"],
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

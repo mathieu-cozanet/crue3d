@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crue 3D — Voir en 3D ce que l'eau recouvre, adresse par adresse</title>
+<meta name="description" content="Crue 3D affiche en 3D les zones inondées et la hauteur d'eau au pied de chaque bâtiment, d'après les cartes officielles Vigicrues et le niveau de la rivière en temps réel. Libre, gratuit, sans compte.">
+<!-- @head -->
+<link rel="stylesheet" href="/src/pages/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Crue 3D",
+  "description": "Visualisation 3D des zones inondées et de la hauteur d'eau au pied des bâtiments, d'après les cartes Vigicrues et le niveau des rivières en temps réel.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Navigateur web",
+  "inLanguage": "fr",
+  "isAccessibleForFree": true,
+  "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
+</head>
+<body>
+<!-- @header -->
+<main id="contenu">
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Libre · gratuit · sans compte</span>
+        <h1>Voir en 3D ce que l'eau recouvre, adresse par adresse.</h1>
+        <p class="lead">Crue 3D lit le niveau de la rivière en temps réel et affiche, en 3D, la zone inondée et la hauteur d'eau au pied de chaque bâtiment, d'après les cartes officielles de Vigicrues.</p>
+        <form class="search-hero" action="{{base}}app/" method="get" role="search">
+          <label for="hero-q" class="skip">Adresse</label>
+          <input id="hero-q" name="q" type="search" placeholder="Votre adresse, une rue, une commune…" required>
+          <button class="btn primary" type="submit">Voir</button>
+        </form>
+        <p class="hint">Ou <a href="{{base}}app/?q=Rue%20de%20Maleffe%2024640%20Bassillac%20et%20Auberoche">essayez sur un exemple : Le Change (Dordogne), au bord de l'Auvézère</a>.</p>
+      </div>
+      <figure class="shot" style="margin:0">
+        <img src="/images/app-hero.jpg" width="1920" height="1418" alt="Vue 3D de Crue 3D : un village au bord de l'Auvézère, la zone inondée colorée en bleu selon la hauteur d'eau, les bâtiments touchés teintés et le contour du PPRI en pointillés rouges." fetchpriority="high">
+        <figcaption>Le Change (Dordogne), scénario à 3,10 m à la station de Cherveix-Cubas.</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <section id="comment">
+    <div class="wrap">
+      <h2>Comment ça marche</h2>
+      <p class="sub">Tout se passe dans votre navigateur, à partir de données publiques officielles. Rien à installer, aucune donnée personnelle collectée.</p>
+      <div class="grid3">
+        <div class="tile"><span class="num-badge">1</span><h3>Une adresse</h3><p>Crue 3D construit la maquette du quartier : relief au mètre près, bâtiments avec leur hauteur, routes et cours d'eau (IGN).</p></div>
+        <div class="tile"><span class="num-badge">2</span><h3>Le niveau de la rivière</h3><p>Le niveau mesuré à la station de référence est lu en direct, avec sa tendance sur 48 heures.</p></div>
+        <div class="tile"><span class="num-badge">3</span><h3>La zone inondée</h3><p>La carte officielle de Vigicrues correspondant à ce niveau s'affiche en 3D, avec la hauteur d'eau par tranches de 50 cm.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Pour les habitants, les mairies et les secours</h2>
+      <p class="sub">Une même carte, deux usages : anticiper chez soi, coordonner sur le terrain.</p>
+      <div class="grid2">
+        <div class="tile">
+          <h3>Habitants</h3>
+          <ul>
+            <li>L'eau arrive-t-elle jusqu'à chez moi, et à partir de quel niveau de la rivière ?</li>
+            <li>Quelle hauteur au pied de la maison pour chaque scénario de crue ?</li>
+            <li>Ma maison est-elle dans la zone réglementée du PPRI ?</li>
+            <li>Sur téléphone, et partageable par simple lien.</li>
+          </ul>
+        </div>
+        <div class="tile">
+          <h3>Mairies et services de secours</h3>
+          <ul>
+            <li>Nombre de bâtiments et de logements touchés, par hauteur d'eau.</li>
+            <li>Établissements non résidentiels concernés (commerces, services…).</li>
+            <li>Voies sous l'eau et longueur coupée, ponts exclus.</li>
+            <li>Export CSV et GeoJSON pour le plan communal de sauvegarde ou un SIG.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="warnbox">
+        <h2>Ce que Crue 3D n'est pas</h2>
+        <ul>
+          <li><b>Ce n'est pas un dispositif d'alerte ni une prévision.</b> En cas de crue, suivez <a href="https://www.vigicrues.gouv.fr/" rel="noopener">Vigicrues</a>, la préfecture et votre mairie. Urgence : 112.</li>
+          <li>La carte affichée est le scénario cartographié <b>juste inférieur</b> au niveau mesuré : l'eau peut aller plus loin entre deux scénarios.</li>
+          <li>La station de référence peut être éloignée : la crue arrive alors avec un décalage de plusieurs heures.</li>
+          <li>Hors des rivières cartographiées par Vigicrues, seule une simulation indicative est proposée.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Des données publiques et officielles</h2>
+      <p class="sub">Crue 3D n'invente rien : il assemble et rend lisibles des données publiées par les services de l'État, sous Licence Ouverte Etalab 2.0.</p>
+      <table class="sources">
+        <thead><tr><th>Information</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>Zones inondées et hauteurs d'eau par scénario</td><td>Vigicrues — zones d'inondation potentielle (ZIP / ZICH)</td></tr>
+          <tr><td>Niveau des rivières en temps réel</td><td>Hub'Eau — hydrométrie</td></tr>
+          <tr><td>Relief, bâtiments, routes, cours d'eau</td><td>IGN — RGE ALTI®, BD TOPO®</td></tr>
+          <tr><td>Zones réglementées des PPRI</td><td>Géoportail de l'Urbanisme</td></tr>
+          <tr><td>Adresses</td><td>Base Adresse Nationale</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <h2>Questions fréquentes</h2>
+      <p class="sub">&nbsp;</p>
+      <details><summary>Est-ce gratuit ?</summary><p>Oui, et sans publicité ni compte. Crue 3D est un logiciel libre sous licence AGPL-3.0 : chacun peut l'utiliser, l'étudier, l'héberger et l'améliorer.</p></details>
+      <details><summary>Que deviennent les adresses que je tape ?</summary><p>Rien n'est stocké par Crue 3D : pas de compte, pas de cookie, pas de mesure d'audience. L'adresse est envoyée à la Base Adresse Nationale pour être localisée, puis les données de la zone sont demandées aux services publics (IGN, Vigicrues). Voir la <a href="{{base}}confidentialite/">politique de confidentialité</a>.</p></details>
+      <details><summary>Ma commune n'affiche pas de carte de crue, pourquoi ?</summary><p>Vigicrues ne cartographie que les tronçons de rivière qu'il surveille, et pas encore tous. Dans ce cas, Crue 3D affiche le contour du PPRI quand il est publié et propose une simulation « baignoire », clairement signalée comme indicative.</p></details>
+      <details><summary>Pourquoi la station de référence est-elle loin de chez moi ?</summary><p>Chaque carte Vigicrues est rattachée à une station de mesure, parfois située plusieurs kilomètres en amont. La crue met alors du temps à arriver : Crue 3D affiche la distance pour que vous en teniez compte.</p></details>
+      <details><summary>Le bâtiment retenu n'est pas le mien.</summary><p>Le point de l'adresse officielle tombe parfois sur la voie ou chez un voisin. Cliquez sur votre bâtiment dans la vue 3D, puis sur « C'est mon bâtiment ».</p></details>
+      <details><summary>Une collectivité peut-elle l'utiliser en cellule de crise ?</summary><p>Oui. L'onglet « Bilan secours » liste bâtiments, logements et voies touchés, exportables en CSV ou GeoJSON. Le site est statique : une collectivité peut l'héberger elle-même. Il reste un outil d'aide à la lecture des cartes officielles, qui ne remplace ni les consignes de la préfecture ni les plans communaux.</p></details>
+      <details><summary>Comment contribuer ?</summary><p>Signalez un problème ou proposez une amélioration sur le dépôt du code source (lien en bas de page). Les retours de collectivités et de services de secours sont particulièrement précieux.</p></details>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="cta">
+        <h2>Regardez votre quartier</h2>
+        <p class="sub" style="margin:8px auto 20px">Quelques secondes suffisent pour charger une zone d'un kilomètre.</p>
+        <a class="btn primary" href="{{base}}app/">Ouvrir Crue 3D</a>
+      </div>
+    </div>
+  </section>
+</main>
+<!-- @footer -->
+<script type="module" src="/src/pages/landing.js"></script>
+<script type="module" src="/src/pwa.js"></script>
+</body>
+</html>

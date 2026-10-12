@@ -1,0 +1,31 @@
+name: Signaler un problème
+description: Quelque chose ne s'affiche pas ou semble faux
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci ! Évitez d'indiquer l'adresse d'un domicile si vous ne souhaitez pas la rendre publique : une rue ou une commune suffit souvent.
+  - type: input
+    id: lieu
+    attributes:
+      label: Lieu
+      description: Commune, rue ou lien Crue 3D
+    validations:
+      required: true
+  - type: textarea
+    id: constat
+    attributes:
+      label: Ce que vous voyez
+      description: Scénario affiché, onglet, message d'erreur…
+    validations:
+      required: true
+  - type: textarea
+    id: attendu
+    attributes:
+      label: Ce que vous attendiez
+      description: Si c'est un écart avec une carte officielle (Vigicrues, PPRI), joignez-la.
+  - type: input
+    id: appareil
+    attributes:
+      label: Navigateur et appareil

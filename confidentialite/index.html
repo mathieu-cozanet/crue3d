@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Politique de confidentialité — Crue 3D</title>
+<meta name="description" content="Crue 3D ne crée pas de compte, ne dépose aucun cookie et ne mesure pas l'audience. Ce qui est transmis aux services publics de données quand vous cherchez une adresse.">
+<!-- @head -->
+<link rel="stylesheet" href="/src/pages/site.css">
+</head>
+<body>
+<!-- @header -->
+<main id="contenu" class="doc">
+  <h1>Politique de confidentialité</h1>
+  <p class="meta">Dernière mise à jour : {{updated}}</p>
+
+  <h2>En résumé</h2>
+  <ul>
+    <li>Pas de compte, pas de cookie, pas de mesure d'audience, pas de publicité.</li>
+    <li>L'éditeur ne collecte ni ne conserve les adresses que vous saisissez.</li>
+    <li>Votre navigateur interroge directement des services publics de données, qui reçoivent votre adresse IP et la zone consultée.</li>
+  </ul>
+
+  <h2>Responsable</h2>
+  <p>{{publisher.name}}, {{publisher.address}} — {{publisher.email}}.</p>
+
+  <h2>Ce qui se passe quand vous cherchez une adresse</h2>
+  <p>Crue 3D fonctionne entièrement dans votre navigateur. Le texte que vous saisissez dans le champ de recherche est envoyé directement par votre navigateur au service de géocodage de la Base Adresse Nationale (<code>api-adresse.data.gouv.fr</code>), qui renvoie les coordonnées correspondantes. Les données de la zone (relief, bâtiments, cartes de crue, niveaux d'eau, PPRI) sont ensuite demandées, à partir de ces coordonnées, aux services suivants :</p>
+  <ul>
+    <li>Géoplateforme de l'IGN (<code>data.geopf.fr</code>) et API Carto de l'IGN (<code>apicarto.ign.fr</code>) ;</li>
+    <li>Hub'Eau (<code>hubeau.eaufrance.fr</code>).</li>
+  </ul>
+  <p>Comme pour toute consultation d'un site web, ces services reçoivent votre adresse IP et le contenu de la requête. Ils les traitent selon leurs propres politiques, en tant que services publics. L'éditeur de Crue 3D n'a pas accès à ces requêtes.</p>
+
+  <h2>Liens de partage</h2>
+  <p>L'adresse recherchée figure dans l'URL de la page (paramètre <code>q</code>) afin de pouvoir partager une vue. Pensez-y avant de partager un lien vers votre domicile.</p>
+
+  <h2>Hébergement</h2>
+  <p>Le site est hébergé par {{host.name}}. Comme tout hébergeur, il peut enregistrer des journaux techniques (adresse IP, date, page demandée) à des fins de sécurité et de fonctionnement, selon sa propre politique de confidentialité. L'éditeur n'exploite pas ces journaux.</p>
+
+  <h2>Stockage sur votre appareil</h2>
+  <p>Pour fonctionner plus vite et pouvoir être installé comme une application, le site conserve dans le cache de votre navigateur ses propres fichiers (pages, styles, scripts). Aucune donnée personnelle ni aucune adresse n'y est enregistrée. Vous pouvez vider ce cache à tout moment depuis les réglages de votre navigateur.</p>
+
+  <h2>Exports</h2>
+  <p>Les fichiers CSV et GeoJSON du « Bilan secours » sont générés dans votre navigateur et enregistrés sur votre appareil ; ils ne transitent par aucun serveur de l'éditeur.</p>
+
+  <h2>Vos droits</h2>
+  <p>L'éditeur ne détenant aucune donnée vous concernant, il ne peut pas en communiquer ni en supprimer. Pour les données traitées par les services publics interrogés ou par l'hébergeur, adressez-vous à eux. Pour toute question : {{publisher.email}}. Vous pouvez également saisir la <a href="https://www.cnil.fr/fr/plaintes" rel="noopener">CNIL</a>.</p>
+</main>
+<!-- @footer -->
+</body>
+</html>

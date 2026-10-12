@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mentions légales — Crue 3D</title>
+<meta name="description" content="Éditeur, hébergeur, propriété intellectuelle et crédits des données de Crue 3D.">
+<!-- @head -->
+<link rel="stylesheet" href="/src/pages/site.css">
+</head>
+<body>
+<!-- @header -->
+<main id="contenu" class="doc">
+  <h1>Mentions légales</h1>
+  <p class="meta">Dernière mise à jour : {{updated}}</p>
+
+  <h2>Éditeur du site</h2>
+  <dl>
+    <dt>Éditeur</dt><dd>{{publisher.status}}</dd>
+    <dt>Adresse</dt><dd>{{publisher.address}}</dd>
+    <dt>SIREN</dt><dd>{{publisher.siren}}</dd>
+    <dt>Immatriculation</dt><dd>{{publisher.rcs}}</dd>
+    <dt>Contact</dt><dd><a href="mailto:{{publisher.email}}">{{publisher.email}}</a></dd>
+    <dt>Directeur ou directrice de la publication</dt><dd>{{publisher.director}}</dd>
+  </dl>
+
+  <h2>Hébergement</h2>
+  <dl>
+    <dt>Hébergeur</dt><dd>{{host.name}}</dd>
+    <dt>Adresse</dt><dd>{{host.address}}</dd>
+    <dt>Site</dt><dd><a href="{{host.url}}" rel="noopener">{{host.url}}</a></dd>
+  </dl>
+
+  <h2>Propriété intellectuelle</h2>
+  <p>Le code source de Crue 3D est un logiciel libre distribué sous licence <a href="https://www.gnu.org/licenses/agpl-3.0.html" rel="noopener">GNU Affero General Public License v3.0 ou ultérieure</a>. Vous pouvez l'utiliser, le modifier et le redistribuer selon les termes de cette licence ; si vous proposez une version modifiée comme service en ligne, vous devez en publier le code source.</p>
+  <p>Les textes et illustrations du site sont diffusés sous la même licence, sauf mention contraire.</p>
+
+  <h2>Données et crédits</h2>
+  <p>Crue 3D affiche des données publiques diffusées sous <a href="https://www.etalab.gouv.fr/licence-ouverte-open-licence/" rel="noopener">Licence Ouverte Etalab 2.0</a>, interrogées directement depuis votre navigateur :</p>
+  <ul>
+    <li>Zones d'inondation potentielle et classes de hauteur d'eau : réseau Vigicrues (ministère chargé de l'environnement), diffusées par la Géoplateforme de l'IGN ;</li>
+    <li>Niveaux d'eau en temps réel : Hub'Eau, API hydrométrie ;</li>
+    <li>Relief (RGE ALTI®), bâtiments, routes et hydrographie (BD TOPO®) : © IGN ;</li>
+    <li>Enveloppes des plans de prévention des risques d'inondation : Géoportail de l'Urbanisme ;</li>
+    <li>Géocodage : Base Adresse Nationale.</li>
+  </ul>
+  <p>Les marques et dénominations citées appartiennent à leurs titulaires. Crue 3D est un projet indépendant : il n'est ni édité ni validé par ces organismes.</p>
+
+  <h2>Signaler un problème</h2>
+  <p>Pour signaler une erreur, un contenu illicite ou une faille de sécurité : {{publisher.email}}.</p>
+</main>
+<!-- @footer -->
+</body>
+</html>

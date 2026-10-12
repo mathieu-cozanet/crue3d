@@ -1,0 +1,22 @@
+name: Proposer une amélioration
+description: Une idée pour les habitants, les mairies ou les secours
+labels: [amélioration]
+body:
+  - type: dropdown
+    id: public
+    attributes:
+      label: Pour qui ?
+      options: [Habitants, Mairies, Services de secours, Tous]
+    validations:
+      required: true
+  - type: textarea
+    id: besoin
+    attributes:
+      label: Le besoin
+      description: Quelle situation, quel problème à résoudre ?
+    validations:
+      required: true
+  - type: textarea
+    id: idee
+    attributes:
+      label: Votre idée

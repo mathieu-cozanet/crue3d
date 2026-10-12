@@ -1,0 +1,16 @@
+/* Design tokens shared by the application and the site pages. */
+:root {
+  --bg: #eef2f5; --surface: #ffffff; --surface-2: #f4f7f9; --text: #17212b; --muted: #5b6875;
+  --line: rgba(23, 33, 43, .12); --accent: #1f6fb5; --accent-ink: #ffffff; --danger: #c0392b; --ok: #2e7d4f;
+  --radius: 10px; --panel-w: 380px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151a; --surface: #172028; --surface-2: #1d2832; --text: #e6edf2; --muted: #95a3af;
+    --line: rgba(230, 237, 242, .12); --accent: #6cb6ec; --accent-ink: #0b1620; --danger: #ff7a6b; --ok: #6fd39a;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151a; --surface: #172028; --surface-2: #1d2832; --text: #e6edf2; --muted: #95a3af;
+  --line: rgba(230, 237, 242, .12); --accent: #6cb6ec; --accent-ink: #0b1620; --danger: #ff7a6b; --ok: #6fd39a;
+}

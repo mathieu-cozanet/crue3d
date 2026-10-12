@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Application — Crue 3D</title>
+<meta name="description" content="Tapez une adresse : Crue 3D affiche en 3D la zone inondée et la hauteur d'eau au pied des bâtiments selon le niveau de la rivière, d'après les cartes Vigicrues.">
+<!-- @head -->
+<link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="{{base}}" aria-label="Crue 3D, accueil"><svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3c5 7 9 12 9 17a9 9 0 0 1-18 0c0-5 4-10 9-17z" fill="currentColor"/></svg>Crue 3D</a>
+  <form class="search" id="searchForm" autocomplete="off" role="search">
+    <input id="q" type="search" placeholder="Adresse, rue ou commune…" aria-label="Adresse">
+  </form>
+  <select id="area" aria-label="Taille de la zone"></select>
+</header>
+
+<main class="layout">
+  <section id="viewer" class="viewer" aria-label="Vue 3D">
+    <div id="empty" class="empty">
+      <h1>Voir en 3D ce que l'eau recouvre</h1>
+      <p>Tapez une adresse : Crue 3D construit le relief et les bâtiments à partir des données IGN, lit le niveau de la rivière en temps réel et affiche la zone inondée correspondante d'après les cartes officielles Vigicrues.</p>
+      <button id="example" class="btn primary">Essayer : Le Change (Dordogne), au bord de l'Auvézère</button>
+    </div>
+    <div id="loading" class="loading" hidden><div class="spinner"></div><ol id="steps"></ol></div>
+    <div class="legend" id="legend" hidden></div>
+    <div class="viewbtns" id="viewbtns" hidden>
+      <button data-view="home" class="btn">Adresse</button><button data-view="3d" class="btn">Ensemble</button><button data-view="top" class="btn">Dessus</button>
+    </div>
+    <div id="card" class="card" hidden></div>
+  </section>
+
+  <aside class="panel" id="panel" hidden>
+    <div id="stationBox"></div>
+    <div id="scenarioBox"></div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="home" class="on">Mon adresse</button>
+      <button role="tab" data-tab="report">Bilan secours</button>
+      <button role="tab" data-tab="layers">Calques</button>
+    </nav>
+    <div id="tab-home" class="tab"></div>
+    <div id="tab-report" class="tab" hidden></div>
+    <div id="tab-layers" class="tab" hidden></div>
+  </aside>
+</main>
+
+<footer class="disclaimer">
+  Outil d'information, <b>pas un dispositif d'alerte</b>. En cas de crue, suivez <a href="https://www.vigicrues.gouv.fr/" target="_blank" rel="noopener">Vigicrues</a> et les consignes de la préfecture et de la mairie. Urgence : 112.
+  <a href="#" id="aboutLink">Sources et limites</a> · <a href="{{base}}cgu/">CGU</a> · <a href="{{base}}confidentialite/">Confidentialité</a> · <a href="{{base}}mentions-legales/">Mentions légales</a>
+</footer>
+
+<dialog id="about">
+  <h2>Sources et limites</h2>
+  <ul>
+    <li><b>Zones inondées et hauteurs d'eau</b> : cartes des zones d'inondation potentielle (ZIP/ZICH) du réseau Vigicrues, une carte par niveau d'eau à une station de référence.</li>
+    <li><b>Niveau de la rivière</b> : observations en temps réel de la station (Hub'Eau, Vigicrues), mises à jour toutes les 5 à 10 minutes.</li>
+    <li><b>Relief</b> : IGN RGE ALTI® (grille de 2 m). <b>Bâtiments et routes</b> : IGN BD TOPO® (hauteur, usage, nombre de logements).</li>
+    <li><b>PPRI</b> : enveloppe des zones réglementées (rouge et bleue confondues), Géoportail de l'Urbanisme.</li>
+  </ul>
+  <p><b>Limites.</b> La carte affichée correspond au scénario cartographié immédiatement inférieur ou égal au niveau mesuré : l'emprise réelle peut être plus grande entre deux scénarios, et elle dépend aussi des affluents, des embâcles et des ouvrages. La station de référence peut être éloignée : le délai de propagation de la crue n'est pas pris en compte. Hors des tronçons cartographiés par Vigicrues, seule une simulation « baignoire » indicative est proposée.</p>
+  <p>Logiciel libre sous licence AGPL-3.0. Données : Etalab 2.0 (IGN, Vigicrues, Hub'Eau, GPU).</p>
+  <form method="dialog"><button class="btn">Fermer</button></form>
+</dialog>
+
+<script type="module" src="/src/main.js"></script>
+<script type="module" src="/src/pwa.js"></script>
+</body>
+</html>
