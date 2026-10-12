@@ -16,4 +16,4 @@ Première version.
 - Recherche d'adresse avec autocomplétion (Base Adresse Nationale) sur l'accueil et dans l'application :
   commune, département et type d'adresse affichés, navigation au clavier, compatible lecteur d'écran.
 - Les liens partagés transportent les coordonnées : pas de second géocodage ni de risque d'homonyme.
-- Nouvelle tentative automatique en cas d'erreur réseau ou de service public surchargé.
+- Jusqu'à deux nouvelles tentatives automatiques en cas d'erreur réseau ou de service public surchargé.

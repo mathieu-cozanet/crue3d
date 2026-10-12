@@ -1,4 +1,4 @@
-// Fetch helpers with timeout and one retry on transient failures (network errors, timeouts, HTTP 5xx / 429):
+// Fetch helpers with timeout and up to two retries on transient failures (network errors, timeouts, HTTP 5xx / 429):
 // public data services get hammered during a flood, exactly when the tool matters most.
 
 class HttpError extends Error {
@@ -7,6 +7,7 @@ class HttpError extends Error {
 
 const transient = e => !(e instanceof HttpError) || e.status >= 500 || e.status === 429;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const RETRY_DELAYS = [800, 2000]; // Hub'Eau, for one, resets connections intermittently
 
 async function request(url, { timeout, signal, read }) {
   const host = new URL(url).host;
@@ -22,8 +23,8 @@ async function request(url, { timeout, signal, read }) {
     } catch (e) {
       if (signal?.aborted) throw e;                       // cancelled by the caller: no retry
       const err = e.name === "AbortError" ? new Error(`Délai dépassé sur ${host}`) : e;
-      if (attempt >= 1 || !transient(err)) throw err;
-      await sleep(800);
+      if (attempt >= RETRY_DELAYS.length || !transient(err)) throw err;
+      await sleep(RETRY_DELAYS[attempt]);
     } finally {
       clearTimeout(timer);
       signal?.removeEventListener("abort", onAbort);

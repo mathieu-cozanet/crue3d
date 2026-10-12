@@ -27,10 +27,10 @@ describe("fetchJSON", () => {
     expect(f).toHaveBeenCalledTimes(1);
   });
 
-  it("gives up after the second failure", async () => {
+  it("gives up after two retries", async () => {
     const f = vi.fn().mockResolvedValue(ko(502));
     vi.stubGlobal("fetch", f);
     await expect(fetchJSON("https://x.test/a")).rejects.toThrow("HTTP 502");
-    expect(f).toHaveBeenCalledTimes(2);
-  });
+    expect(f).toHaveBeenCalledTimes(3);
+  }, 10000);
 });
