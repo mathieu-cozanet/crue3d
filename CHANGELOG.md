@@ -1,5 +1,15 @@
 # Journal des versions
 
+## 0.4.0 — 13 octobre 2026
+
+- **Intégration** : page « Intégrer à votre site » qui génère le code à copier-coller (adresse, taille de zone,
+  hauteur) ; mode intégré compact avec un bouton « Ouvrir en grand ».
+- **Vidéo** : bouton « Vidéo » qui enregistre la montée des eaux, scénario par scénario, avec le nombre de
+  bâtiments touchés, la légende et l'avertissement ; format vertical (réseaux sociaux) ou paysage ; MP4 quand le
+  navigateur le permet, partage direct sur mobile.
+- **Carte de couverture** : où Vigicrues a cartographié les zones inondées, avec recherche d'adresse
+  (« ma commune est-elle couverte ? ») ; données régénérées chaque mois.
+
 ## 0.3.0 — 12 octobre 2026
 
 - Nouveau rendu de l'eau : surface animée (vagues, reflets du soleil et du ciel), couleur continue selon la

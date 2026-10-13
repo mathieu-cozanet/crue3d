@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carte de couverture — Crue 3D</title>
+<meta name="description" content="Où Vigicrues a-t-il cartographié les zones inondables ? Vérifiez si votre commune est couverte par Crue 3D.">
+<!-- @head -->
+<link rel="stylesheet" href="/src/pages/site.css">
+</head>
+<body>
+<!-- @header -->
+<main id="contenu" class="doc wide">
+  <h1>Ma commune est-elle couverte ?</h1>
+  <p class="lead">En bleu, les secteurs où Vigicrues a cartographié les zones inondées selon le niveau de la rivière. Là, Crue 3D montre la hauteur d'eau au pied de chaque bâtiment. Ailleurs, l'outil ne propose qu'une simulation indicative.</p>
+  <form id="covForm" class="search-hero" role="search" autocomplete="off">
+    <label for="covQ" class="skip">Adresse ou commune</label>
+    <input id="covQ" type="search" placeholder="Une adresse ou une commune…">
+    <button class="btn primary" type="submit">Vérifier</button>
+  </form>
+  <p id="covResult" class="cov-result" role="status" aria-live="polite"></p>
+  <div id="covMap" class="cov-map" aria-label="Carte des zones cartographiées par Vigicrues"></div>
+  <p id="covMeta" class="hint-inline"></p>
+  <p class="hint-inline">Chaque zone correspond à la plus grande crue cartographiée pour une station de référence. Fond de carte © IGN. Données Vigicrues (Licence Ouverte Etalab 2.0).</p>
+</main>
+<!-- @footer -->
+<script type="module" src="/src/pages/couverture.js"></script>
+<script type="module" src="/src/pwa.js"></script>
+</body>
+</html>

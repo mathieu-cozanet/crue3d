@@ -1,0 +1,32 @@
+name: Mise à jour de la couverture Vigicrues
+
+# Rebuilds public/data/couverture.json once a month (Vigicrues adds new mapped river sections over time)
+# and commits it if it changed; the push then triggers the deployment.
+on:
+  schedule:
+    - cron: "17 4 3 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run coverage
+      - name: Enregistrer si la couverture a changé
+        run: |
+          if git diff --quiet -- public/data/couverture.json; then echo "Couverture inchangée"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/couverture.json
+          git commit -m "Couverture Vigicrues : mise à jour mensuelle"
+          git push

@@ -77,7 +77,25 @@ details p { color: var(--muted); margin: 10px 0 0; }
 .doc dt { color: var(--muted); }
 .doc dd { margin: 0; }
 
+/* wide document pages (integration generator, coverage map) */
+.doc.wide { max-width: 1120px; }
+.lead.small, .doc .lead { font-size: 17px; }
+.hint-inline { font-size: 13px; color: var(--muted); }
+.embed-grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; margin-top: 18px; }
+.field { display: grid; gap: 6px; margin-bottom: 14px; font-weight: 600; font-size: 14px; }
+.field input, .field select, textarea { font: inherit; font-weight: 400; padding: 9px 11px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); width: 100%; }
+textarea { font-family: ui-monospace, Consolas, monospace; font-size: 12px; resize: vertical; }
+.ac-wrap { position: relative; display: block; }
+.embed-preview { border: 1px dashed var(--line); border-radius: 14px; padding: 10px; min-height: 200px; display: grid; place-items: center; background: var(--surface); }
+.embed-preview iframe { display: block; width: 100%; }
+.cov-map { height: min(68vh, 640px); border-radius: 14px; border: 1px solid var(--line); margin: 14px 0 8px; z-index: 0; }
+.cov-result { min-height: 1.6em; margin: 12px 0 0; padding: 0; }
+.cov-result.yes, .cov-result.no { padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); }
+.cov-result.yes { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+.cov-result.no { border-color: color-mix(in srgb, #c98a1a 45%, var(--line)); }
+
 @media (max-width: 860px) {
+  .embed-grid { grid-template-columns: 1fr; }
   .hero .wrap, .grid3, .grid2 { grid-template-columns: 1fr; }
   .hero { padding-top: 36px; }
   .site-header nav a:not(.btn) { display: none; }

@@ -1,6 +1,6 @@
 {
   "name": "crue3d",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Visualisation 3D open source de l'état des terrains en cas d'inondation, à partir des données publiques françaises (Vigicrues, IGN, Géorisques).",
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -9,9 +9,11 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "check": "node build/check-release.js"
+    "check": "node build/check-release.js",
+    "coverage": "node build/build-coverage.mjs"
   },
   "dependencies": {
+    "leaflet": "^1.9.4",
     "proj4": "^2.11.0",
     "three": "^0.160.0"
   },

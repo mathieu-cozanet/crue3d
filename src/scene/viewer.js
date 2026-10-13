@@ -65,6 +65,7 @@ export class FloodViewer {
   }
 
   resize() {
+    if (this.capture) return;   // the recording owns the canvas size
     const { clientWidth: w, clientHeight: h } = this.container;
     if (!w || !h) return;
     this.renderer.setSize(w, h);
@@ -85,6 +86,35 @@ export class FloodViewer {
     }
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
+    this.onFrame?.(t);   // video capture copies the frame right after it is drawn
+  }
+
+  /**
+   * Renders at a fixed size (independent of the window) with a slow orbit, for video capture.
+   * Returns a function that restores the interactive view.
+   */
+  beginCapture(width, height) {
+    const ratio = this.renderer.getPixelRatio();
+    const cam = { pos: this.camera.position.clone(), target: this.controls.target.clone() };
+    this.capture = true;
+    this.renderer.setPixelRatio(1);
+    this.renderer.setSize(width, height, false);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    if (height > width) {   // portrait: step back so the scene still fits the narrow frame
+      const d = this.camera.position.clone().sub(this.controls.target);
+      this.camera.position.copy(this.controls.target).add(d.multiplyScalar(1.35));
+    }
+    Object.assign(this.controls, { autoRotate: true, autoRotateSpeed: 0.55, enabled: false });
+    return () => {
+      Object.assign(this.controls, { autoRotate: false, enabled: true });
+      this.onFrame = null;
+      this.capture = false;
+      this.renderer.setPixelRatio(ratio);
+      this.camera.position.copy(cam.pos);
+      this.controls.target.copy(cam.target);
+      this.resize();
+    };
   }
 
   // ---------- data ----------

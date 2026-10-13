@@ -36,6 +36,16 @@ clairement signalée comme indicative, et affiche l'enveloppe du PPRI quand elle
 Tout tourne **dans le navigateur** : pas de serveur, pas de compte, pas de collecte de données. Les services publics
 interrogés acceptent les appels directs (CORS).
 
+## Diffusion
+
+- **Intégration dans un site** : la page `integrer/` génère un `<iframe>` vers `app/?…&embed` (interface compacte,
+  lien « Ouvrir en grand »). Aucun cookie : pas de bandeau de consentement à prévoir.
+- **Vidéo** : le bouton « Vidéo » de l'application enregistre la montée des eaux (MediaRecorder, MP4 ou WebM selon le
+  navigateur), en 1080 × 1920 ou 1920 × 1080, avec titre, légende et avertissement incrustés.
+- **Carte de couverture** : `couverture/` affiche les secteurs cartographiés par Vigicrues, à partir de
+  `public/data/couverture.json`. Ce fichier est produit par `npm run coverage` (la plus grande crue cartographiée de
+  chaque station, contours simplifiés à ~40 m) et régénéré chaque mois par le workflow `coverage.yml`.
+
 ## Sources de données
 
 | Donnée | Source | Licence |

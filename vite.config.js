@@ -14,6 +14,8 @@ export default defineConfig({
       input: {
         home: page("index.html"),
         app: page("app/index.html"),
+        couverture: page("couverture/index.html"),
+        integrer: page("integrer/index.html"),
         cgu: page("cgu/index.html"),
         mentions: page("mentions-legales/index.html"),
         confidentialite: page("confidentialite/index.html"),

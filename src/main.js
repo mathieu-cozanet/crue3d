@@ -9,6 +9,7 @@ import { groupScenarios, selectScenario, footprintDepth, summarize, fmtLevel, de
 import { rasterizeScenario, rasterizeLevel, analysisGrid, rasterizeMask } from "./raster.js";
 import { canopyHeight, detectTrees } from "./trees.js";
 import { FloodViewer } from "./scene/viewer.js";
+import { FORMATS, pickMime, recordFloodVideo } from "./video.js";
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -22,6 +23,18 @@ const state = {
   bathtub: 0, homeIndex: -1, homeGuessed: false,
 };
 let viewer = null;
+
+// Embedded in another site (?embed): compact chrome and a link to open the full app.
+const EMBED = new URL(location.href).searchParams.has("embed");
+if (EMBED) document.documentElement.classList.add("embed");
+function updateFullLink() {
+  if (!EMBED) return;
+  const full = new URL(location.href);
+  full.searchParams.delete("embed");
+  $("openFull").href = full.href;
+  $("openFull").hidden = false;
+}
+updateFullLink();
 
 // ---------- search ----------
 const areaSel = $("area");
@@ -38,6 +51,7 @@ function choose(a) {
   url.searchParams.set("q", a.label); url.searchParams.set("zone", areaSel.value);
   url.searchParams.set("lon", a.lonlat[0].toFixed(6)); url.searchParams.set("lat", a.lonlat[1].toFixed(6));
   history.replaceState(null, "", url);
+  updateFullLink();
   load(a);
 }
 
@@ -390,6 +404,64 @@ function showBuilding(bi) {
   const sh = $("setHome");
   if (sh) sh.onclick = () => { state.homeIndex = bi; state.homeGuessed = false; viewer.homeIndex = bi; viewer.group.remove(viewer.pin); viewer.buildPin(); renderHome(); showBuilding(bi); };
 }
+
+// ---------- video export ----------
+const placeName = full => (full ? state.addr.label : (state.addr.city || state.addr.label.match(/\d{5}\s+(.+)$/)?.[1] || state.addr.label));
+
+function videoSteps() {
+  const station = state.stationInfo?.label || state.station?.label || "";
+  const hit = k => depthsFor(k).reduce((n, v) => n + (v ? 1 : 0), 0);
+  const steps = [{ hold: 2200, caption: "Rivière dans son lit", detail: station ? `Station de référence : ${station}` : "", run: () => { state.mode = -1; apply(); } }];
+  state.scenarios.forEach((s, k) => steps.push({
+    hold: 2700, caption: `Rivière à ${fmtLevel(s.levelMm)}`,
+    detail: `${hit(k)} bâtiment${hit(k) > 1 ? "s" : ""} touché${hit(k) > 1 ? "s" : ""} · niveau mesuré à la station`,
+    run: () => { state.mode = k; apply(); },
+  }));
+  steps.at(-1).hold = 4200;
+  return steps;
+}
+
+let lastVideo = null;
+$("videoBtn").onclick = () => {
+  const ok = state.scenarios.length > 0 && pickMime();
+  $("vidStatus").textContent = !pickMime() ? "Votre navigateur ne permet pas d'enregistrer une vidéo (essayez Chrome, Edge ou Safari récent)."
+    : !state.scenarios.length ? "Pas de scénario Vigicrues sur cette zone : la vidéo n'est disponible que là où les crues sont cartographiées." : "";
+  $("vidStart").disabled = !ok;
+  $("videoDlg").showModal();
+};
+$("vidClose").onclick = () => $("videoDlg").close();
+$("vidStart").onclick = async () => {
+  const format = document.querySelector("input[name=vidFormat]:checked").value;
+  const previous = state.mode;
+  $("vidForm").hidden = true; $("vidStart").hidden = true; $("vidDownload").hidden = true; $("vidShare").hidden = true;
+  $("vidPreview").hidden = false;
+  $("vidClose").disabled = true;
+  try {
+    const site = new URL("../", location.href).href.replace(/^https?:\/\//, "").replace(/\/$/, "");
+    const { blob, ext, mime } = await recordFloodVideo(viewer, {
+      format, place: placeName($("vidAddress").checked), site, steps: videoSteps(), preview: $("vidPreview"),
+      onProgress: p => ($("vidStatus").textContent = `Enregistrement… ${Math.round(p * 100)} %`),
+    });
+    if (lastVideo) URL.revokeObjectURL(lastVideo);
+    lastVideo = URL.createObjectURL(blob);
+    const video = Object.assign(document.createElement("video"), { src: lastVideo, controls: true, loop: true, muted: true, playsInline: true });
+    $("vidPreview").replaceChildren(video);
+    const name = `crue3d-${placeName(false).toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${format}.${ext}`;
+    Object.assign($("vidDownload"), { href: lastVideo, download: name, hidden: false });
+    const file = new File([blob], name, { type: mime });
+    if (navigator.canShare?.({ files: [file] })) {
+      $("vidShare").hidden = false;
+      $("vidShare").onclick = () => navigator.share({ files: [file], title: "Crue 3D" }).catch(() => {});
+    }
+    $("vidStatus").textContent = `Vidéo prête (${(blob.size / 1e6).toFixed(1)} Mo, ${ext.toUpperCase()}).`
+      + (ext === "webm" ? " Ce navigateur produit du WebM : certains réseaux sociaux demandent du MP4 (Safari ou Chrome récent en produisent)." : "");
+  } catch (e) {
+    $("vidStatus").textContent = `Échec de l'enregistrement : ${e.message}`;
+  } finally {
+    state.mode = previous; apply();
+    $("vidForm").hidden = false; $("vidStart").hidden = false; $("vidClose").disabled = false;
+  }
+};
 
 // Refresh the real-time level every 5 minutes; the map follows it in "now" mode.
 setInterval(async () => {

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intégrer Crue 3D à votre site — Crue 3D</title>
+<meta name="description" content="Ajoutez gratuitement la carte 3D des zones inondables de votre commune sur le site de la mairie : un code à copier-coller, sans inscription.">
+<!-- @head -->
+<link rel="stylesheet" href="/src/pages/site.css">
+</head>
+<body>
+<!-- @header -->
+<main id="contenu" class="doc wide">
+  <h1>Intégrer Crue 3D à votre site</h1>
+  <p class="lead">Mairies, communautés de communes, syndicats de rivière : affichez la carte 3D des zones inondables de votre territoire sur votre propre site. C'est gratuit, sans inscription, et le contenu se met à jour tout seul (niveau de la rivière en temps réel).</p>
+
+  <div class="embed-grid">
+    <form id="embedForm" class="tile" autocomplete="off">
+      <h2 style="margin-top:0">1. Réglez la vue</h2>
+      <label class="field">Adresse de départ <span class="hint-inline">(la mairie, le centre-bourg…)</span>
+        <span class="ac-wrap"><input id="embedQ" type="search" placeholder="Tapez une adresse…" required></span>
+      </label>
+      <label class="field">Taille de la zone
+        <select id="embedZone"><option value="0">500 × 350 m</option><option value="1" selected>1 000 × 700 m</option><option value="2">1 500 × 1 000 m</option></select>
+      </label>
+      <label class="field">Hauteur sur votre page
+        <select id="embedHeight"><option>480</option><option selected>640</option><option>800</option></select>
+      </label>
+      <h2>2. Copiez le code</h2>
+      <textarea id="embedCode" rows="6" readonly placeholder="Choisissez d'abord une adresse."></textarea>
+      <p><button type="button" id="copyCode" class="btn primary" disabled>Copier le code</button> <span id="copyStatus" class="hint-inline" role="status"></span></p>
+      <p class="hint-inline">Collez-le dans un bloc « HTML » de votre site (WordPress, Wix, site de la collectivité…). Besoin d'aide ? Écrivez à {{publisher.email}}.</p>
+    </form>
+    <div>
+      <h2 style="margin-top:0">Aperçu</h2>
+      <div id="embedPreview" class="embed-preview"><p class="hint-inline">L'aperçu apparaît ici dès que vous avez choisi une adresse.</p></div>
+    </div>
+  </div>
+
+  <h2>Bon à savoir</h2>
+  <ul>
+    <li>La carte est hébergée par Crue 3D : rien à installer ni à maintenir de votre côté.</li>
+    <li>Aucun cookie ni traceur : pas de bandeau de consentement à ajouter pour ce module.</li>
+    <li>Les visiteurs peuvent ouvrir la version complète en un clic (bouton « Ouvrir en grand »).</li>
+    <li>Le module reprend l'avertissement : c'est un outil d'information, pas un dispositif d'alerte.</li>
+  </ul>
+</main>
+<!-- @footer -->
+<script type="module" src="/src/pages/integrer.js"></script>
+<script type="module" src="/src/pwa.js"></script>
+</body>
+</html>

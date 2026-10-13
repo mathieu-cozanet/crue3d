@@ -44,6 +44,7 @@ const header = base => `
   </a>
   <nav aria-label="Navigation principale">
     <a href="${base}#comment">Comment ça marche</a>
+    <a href="${base}couverture/">Couverture</a>
     <a href="${base}#faq">Questions</a>
     ${site.repo ? `<a href="${site.repo}" rel="noopener">Code source</a>` : ""}
     <a class="btn primary" href="${base}app/">Ouvrir l'application</a>
@@ -58,6 +59,8 @@ const footer = base => `
       <p>Logiciel libre (AGPL-3.0) d'information sur les inondations.<br>Pas un dispositif d'alerte : suivez <a href="https://www.vigicrues.gouv.fr/" rel="noopener">Vigicrues</a> et les consignes officielles. Urgence : 112.</p>
     </div>
     <nav aria-label="Informations légales">
+      <a href="${base}couverture/">Carte de couverture</a>
+      <a href="${base}integrer/">Intégrer à votre site</a>
       <a href="${base}mentions-legales/">Mentions légales</a>
       <a href="${base}cgu/">Conditions d'utilisation</a>
       <a href="${base}confidentialite/">Confidentialité</a>

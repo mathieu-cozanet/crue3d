@@ -125,6 +125,18 @@ svg.spark { width: 100%; height: 90px; display: block; margin-top: 6px; }
 h2.sec { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 14px 0 6px; }
 input[type=range] { width: 100%; accent-color: var(--accent); }
 
+/* embedded in another site (iframe): no search, compact bar, link to the full app */
+.embed .search, .embed #area { display: none; }
+.embed .top { justify-content: space-between; padding: 6px 12px; }
+.embed { --panel-w: 320px; }
+
+.video-dlg { width: min(560px, calc(100% - 32px)); }
+.video-dlg h2 { margin: 0 0 6px; font-size: 18px; }
+.vid-formats { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin: 10px 0; display: grid; gap: 4px; }
+.vid-formats legend { font-size: 12px; color: var(--muted); padding: 0 4px; }
+.vid-preview { margin: 10px 0; display: grid; place-items: center; background: #0b1c30; border-radius: 10px; padding: 8px; }
+.vid-preview canvas, .vid-preview video { max-width: 100%; max-height: 52vh; height: auto; border-radius: 6px; }
+
 .disclaimer { padding: 7px 16px; font-size: 12px; color: var(--muted); background: var(--surface); border-top: 1px solid var(--line); }
 dialog { max-width: 640px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--text); }
 

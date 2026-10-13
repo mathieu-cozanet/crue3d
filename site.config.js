@@ -37,6 +37,8 @@ export default {
   pages: [
     { path: "/", priority: 1.0, changefreq: "monthly" },
     { path: "/app/", priority: 0.9, changefreq: "monthly" },
+    { path: "/couverture/", priority: 0.7, changefreq: "monthly" },
+    { path: "/integrer/", priority: 0.6, changefreq: "monthly" },
     { path: "/cgu/", priority: 0.2, changefreq: "yearly" },
     { path: "/mentions-legales/", priority: 0.2, changefreq: "yearly" },
     { path: "/confidentialite/", priority: 0.2, changefreq: "yearly" },
